@@ -1,0 +1,18 @@
+# ============================================================================
+# Prometheus Configuration Snippet — For Your Teammates
+# ============================================================================
+# Your teammates handling Prometheus should MERGE these sections into
+# their existing prometheus.yml. This is NOT a complete prometheus.yml.
+# ============================================================================
+
+# ---- Add this so Prometheus forwards alerts to your Alertmanager ----
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['<alertmanager-server-IP>:9093']
+
+# ---- Add this under scrape_configs ----
+scrape_configs:
+  - job_name: 'node'
+    static_configs:
+      - targets: ['<server1-IP>:9100', '<server2-IP>:9100']

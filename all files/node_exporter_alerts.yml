@@ -1,0 +1,57 @@
+# ============================================================================
+# Prometheus Alert Rules — Hand to your Prometheus teammate
+# ============================================================================
+# They should save this as /etc/prometheus/rules.yml and reference it
+# in their prometheus.yml:
+#
+#   rule_files:
+#     - "rules.yml"
+#
+# Thresholds match section 6 of the project doc:
+#   CPU idle < 20%  →  CPU usage > 80%
+#   Memory available < 10%  →  Memory usage > 90%
+#   Disk usage > 85%
+# ============================================================================
+
+groups:
+  - name: node_alerts
+    rules:
+      # Server completely unreachable
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is DOWN"
+          description: "{{ $labels.instance }} has been unreachable for more than 2 minutes."
+
+      # CPU usage above 80% (idle below 20%)
+      - alert: HighCpuUsage
+        expr: (1 - avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)."
+
+      # Memory usage above 90% (available below 10%)
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% (threshold: 90%)."
+
+      # Disk usage above 85%
+      - alert: DiskSpaceHigh
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|squashfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|squashfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space high on {{ $labels.instance }}"
+          description: "{{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% full (threshold: 85%)."
