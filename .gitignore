@@ -1,0 +1,8 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local files / build directories
+.dist/
+.DS_Store
+Thumbs.db
