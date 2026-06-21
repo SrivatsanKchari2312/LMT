@@ -1,0 +1,46 @@
+groups:
+  - name: system_alerts
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is DOWN"
+          description: "{{ $labels.instance }} has been unreachable for more than 2 minutes."
+
+      - alert: UnexpectedReboot
+        expr: (node_time_seconds - node_boot_time_seconds) < 600
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unexpected reboot on {{ $labels.instance }}"
+          description: "System was rebooted less than 10 minutes ago (uptime: {{ $value | humanizeDuration }})."
+
+      - alert: HighZombieProcesses
+        expr: node_procs_zombie > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High zombie process count on {{ $labels.instance }}"
+          description: "{{ $value }} zombie processes detected (threshold: 5)."
+
+      - alert: HighFileDescriptors
+        expr: node_filefd_allocated / node_filefd_maximum * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High file descriptor usage on {{ $labels.instance }}"
+          description: "FD usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)."
+
+      - alert: ClockSkewDetected
+        expr: abs(node_timex_offset_seconds) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Clock skew detected on {{ $labels.instance }}"
+          description: "NTP offset is {{ $value | printf \"%.3f\" }}s (threshold: ±50ms)."

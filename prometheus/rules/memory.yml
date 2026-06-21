@@ -1,0 +1,40 @@
+groups:
+  - name: memory_alerts
+    rules:
+      - alert: LowMemoryWarning
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 15
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low memory on {{ $labels.instance }}"
+          description: "Available memory is {{ $value | printf \"%.1f\" }}% (threshold: < 15%)."
+
+      - alert: LowMemoryCritical
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory on {{ $labels.instance }}"
+          description: "Available memory is {{ $value | printf \"%.1f\" }}% (threshold: < 5%)."
+
+      - alert: SwapUsageHigh
+        expr: >
+          (node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes)
+          / node_memory_SwapTotal_bytes * 100 > 80
+          and node_memory_SwapTotal_bytes > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High swap usage on {{ $labels.instance }}"
+          description: "Swap usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)."
+
+      - alert: OOMKillDetected
+        expr: increase(node_vmstat_oom_kill[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "OOM kill detected on {{ $labels.instance }}"
+          description: "An out-of-memory kill event occurred in the last 5 minutes."

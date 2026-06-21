@@ -1,0 +1,59 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    team: 'linux-monitoring'
+    environment: 'production'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+
+rule_files:
+  - "rules/cpu.yml"
+  - "rules/memory.yml"
+  - "rules/disk.yml"
+  - "rules/network.yml"
+  - "rules/system.yml"
+  - "rules/prometheus_self.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'monitoring-server'
+
+  - job_name: 'node'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          instance: 'monitoring-server'
+
+      # ---------------------------------------------------------------
+      # Add company servers below. Format:
+      #   - targets: ['<IP>:9100']
+      #     labels:
+      #       instance: '<friendly-name>'
+      #       team: '<team-name>'          # optional
+      #       env: 'production'            # optional
+      #
+      # After adding: copy this file to /etc/prometheus/prometheus.yml
+      # then: sudo systemctl reload prometheus
+      # Verify at: http://<monitoring-IP>:9090/targets
+      # ---------------------------------------------------------------
+
+      # Example — uncomment and fill in real values:
+      # - targets: ['192.168.1.101:9100']
+      #   labels:
+      #     instance: 'web-server-1'
+      #     team: 'backend'
+      #     env: 'production'
+      #
+      # - targets: ['192.168.1.102:9100']
+      #   labels:
+      #     instance: 'db-server-1'
+      #     team: 'database'
+      #     env: 'production'

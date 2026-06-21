@@ -1,0 +1,38 @@
+groups:
+  - name: cpu_alerts
+    rules:
+      - alert: HighCPUWarning
+        expr: (1 - avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)."
+
+      - alert: HighCPUCritical
+        expr: (1 - avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 95%)."
+
+      - alert: HighIOWait
+        expr: avg by(instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High I/O wait on {{ $labels.instance }}"
+          description: "I/O wait is {{ $value | printf \"%.1f\" }}% (threshold: 20%)."
+
+      - alert: HighLoadAverage
+        expr: node_load15 / count by(instance) (node_cpu_seconds_total{mode="idle"}) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 15-minute load average on {{ $labels.instance }}"
+          description: "Load per core is {{ $value | printf \"%.2f\" }} (threshold: 1.0 — saturated)."

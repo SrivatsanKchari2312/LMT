@@ -6,3 +6,18 @@ __pycache__/
 .dist/
 .DS_Store
 Thumbs.db
+
+# Credentials — never commit
+.env
+*.key
+*.pem
+*.p12
+
+# OS artifacts
+*.swp
+*.swo
+*~
+
+# Downloaded binaries (installed to /usr/local/bin via scripts)
+*.tar.gz
+*.zip

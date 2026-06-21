@@ -1,0 +1,39 @@
+groups:
+  - name: network_alerts
+    rules:
+      - alert: HighRXBandwidth
+        expr: rate(node_network_receive_bytes_total[5m]) * 8 > 800000000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High inbound bandwidth on {{ $labels.instance }}"
+          description: "Interface {{ $labels.device }} receiving {{ $value | humanize }}bps (threshold: 800Mbps)."
+
+      - alert: HighTXBandwidth
+        expr: rate(node_network_transmit_bytes_total[5m]) * 8 > 800000000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High outbound bandwidth on {{ $labels.instance }}"
+          description: "Interface {{ $labels.device }} transmitting {{ $value | humanize }}bps (threshold: 800Mbps)."
+
+      - alert: HighNetworkErrorRate
+        expr: >
+          rate(node_network_receive_errs_total[5m]) > 10
+          or rate(node_network_transmit_errs_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network error rate on {{ $labels.instance }}"
+          description: "Interface {{ $labels.device }} error rate exceeds 10 errors/s."
+
+      - alert: NetworkInterfaceDown
+        expr: node_network_carrier{device!="lo"} == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Network interface down on {{ $labels.instance }}"
+          description: "Interface {{ $labels.device }} has lost carrier signal."

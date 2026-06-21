@@ -1,0 +1,49 @@
+# ============================================================================
+# Alertmanager Configuration
+# ============================================================================
+# File:    /etc/alertmanager/alertmanager.yml
+# Reload:  sudo systemctl reload alertmanager
+# Validate: amtool check-config /etc/alertmanager/alertmanager.yml
+#
+# SMTP credentials must be set via environment or filled in here.
+# For Gmail: enable 2FA, then create an App Password at
+#   https://myaccount.google.com/apppasswords
+# ============================================================================
+
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'your_project_email@gmail.com'
+  smtp_auth_username: 'your_project_email@gmail.com'
+  smtp_auth_password: 'your_16_char_app_password'
+  smtp_require_tls: true
+
+route:
+  receiver: 'team-email'
+  group_by: ['alertname', 'instance']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: 'team-email'
+      group_wait: 10s
+      repeat_interval: 1h
+
+receivers:
+  - name: 'team-email'
+    email_configs:
+      - to: 'team-oncall@example.com'
+        send_resolved: true
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .CommonAnnotations.summary }}'
+
+# ============================================================================
+# Webhook receiver (Slack/Discord) — uncomment to use instead of email
+# ============================================================================
+# receivers:
+#   - name: 'team-webhook'
+#     webhook_configs:
+#       - url: 'https://your-webhook-url-here'
+#         send_resolved: true

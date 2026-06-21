@@ -1,0 +1,20 @@
+# ============================================================================
+# Scrape Target Inventory — Person A: update after confirming all targets
+# ============================================================================
+# Format: hostname | IP | port | instance_label | OS
+# This file is the handoff artifact for Day 3 EOD (Handoff 1).
+# Person B uses instance labels in PromQL selectors.
+# Person C uses hostnames to name Grafana panels.
+# ============================================================================
+
+# Monitoring VM (runs Prometheus, Alertmanager, Grafana, Node Exporter)
+monitoring-server | 127.0.0.1 | 9100 | monitoring-server | Ubuntu 24.04 LTS
+
+# Add additional target servers below:
+# server-1 | <IP> | 9100 | server-1 | Ubuntu 22.04 LTS
+# server-2 | <IP> | 9100 | server-2 | Ubuntu 22.04 LTS
+
+# ============================================================================
+# Prometheus self-scrape target
+monitoring-server | 127.0.0.1 | 9090 | monitoring-server | (Prometheus)
+# ============================================================================
